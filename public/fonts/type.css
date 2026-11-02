@@ -1,0 +1,11 @@
+@font-face {
+  font-family: "Fahkwang";
+  src: url("./fahkwang.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+}
+
+:root {
+  --identity-font: "Fahkwang", sans-serif;
+}
