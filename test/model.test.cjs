@@ -30,3 +30,28 @@ test("the plot anchors stay fixed as control points change", () => {
   assert.deepEqual(plot(1, 1), [268, 64]);
   assert.equal(path(presets.linear), "M28 140 C28 140 268 64 268 64");
 });
+
+test("CSS import accepts values and declarations while retaining numeric precision", () => {
+  const { parseCSS } = require("../public/model.js");
+  assert.deepEqual(
+    parseCSS(
+      " animation-timing-function: cubic-bezier(.125, -0.1, 5e-1, 1.25); ",
+    ),
+    [0.125, -0.1, 0.5, 1.25],
+  );
+  assert.deepEqual(parseCSS(easing(presets.express)), presets.express);
+});
+
+test("CSS import rejects invalid, compound and out-of-canvas inputs", () => {
+  const { parseCSS } = require("../public/model.js");
+  for (const value of [
+    "linear",
+    "cubic-bezier(0, , 1, 1)",
+    "cubic-bezier(0, 0, 2, 1)",
+    "cubic-bezier(0, 2, 1, 1)",
+    "cubic-bezier(0, 0, 1, 1);color:red",
+    "cubic-bezier(0x1, 0, 1, 1)",
+  ]) {
+    assert.throws(() => parseCSS(value));
+  }
+});

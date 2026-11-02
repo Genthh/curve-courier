@@ -27,6 +27,43 @@ const CurveCourier = (() => {
     return "cubic-bezier(" + values.join(", ") + ")";
   }
 
+  function parseCSS(raw) {
+    if (typeof raw !== "string" || raw.length > 512) {
+      throw new Error(
+        "Paste a single cubic-bezier() value or timing-function declaration.",
+      );
+    }
+    const parts = raw
+      .trim()
+      .match(
+        /^(?:(?:transition|animation)-timing-function\s*:\s*)?cubic-bezier\(\s*([^()]*)\s*\)\s*;?$/i,
+      );
+    if (!parts)
+      throw new Error(
+        "Paste a single cubic-bezier() value or timing-function declaration.",
+      );
+    const tokens = parts[1].split(",").map((token) => token.trim());
+    const cssNumber = /^[+-]?(?:\d*\.\d+|\d+)(?:e[+-]?\d+)?$/i;
+    if (
+      tokens.length !== 4 ||
+      !tokens.every((token) => cssNumber.test(token))
+    ) {
+      throw new Error("Include four numeric coordinates separated by commas.");
+    }
+    const coords = tokens.map(Number);
+    if (!valid(coords))
+      throw new Error("X coordinates must fall between 0 and 1.");
+    if (
+      coords[1] < -0.5 ||
+      coords[1] > 1.5 ||
+      coords[3] < -0.5 ||
+      coords[3] > 1.5
+    ) {
+      throw new Error("This canvas supports Y coordinates from −0.5 to 1.5.");
+    }
+    return coords;
+  }
+
   function plot(x, y) {
     return [28 + 240 * x, 140 - 76 * y];
   }
@@ -57,7 +94,7 @@ const CurveCourier = (() => {
     );
   }
 
-  return { presets, valid, easing, plot, path, match };
+  return { presets, valid, easing, parseCSS, plot, path, match };
 })();
 
 if (typeof module !== "undefined") module.exports = CurveCourier;
