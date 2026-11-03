@@ -1,0 +1,85 @@
+[hidden] {
+  display: none !important;
+}
+.pin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+}
+.pin-actions button,
+#apply-css {
+  border: 1px solid #877a97;
+  border-radius: 18px;
+  background: #fcfbff;
+  color: var(--accent);
+  min-height: 38px;
+  padding: 6px 13px;
+}
+.pin-actions button:hover,
+#apply-css:hover {
+  background: #e8ddf4;
+}
+#pin-status {
+  overflow-wrap: anywhere;
+}
+.lanes {
+  flex: 1;
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+.lane {
+  display: grid;
+  align-items: center;
+  grid-template-columns: 54px 1fr;
+  min-width: 0;
+}
+.lane-name {
+  font:
+    12px/1.4 ui-monospace,
+    monospace;
+  color: var(--quiet);
+}
+#reference-runner {
+  display: block;
+  width: 25px;
+  height: 25px;
+  position: relative;
+  border: 2px dashed #14645c;
+  background: #c0ebe2;
+  border-radius: 4px;
+}
+.import-form {
+  margin-top: 10px;
+}
+.import-form label {
+  color: var(--ink);
+  font:
+    13px/1.5 ui-monospace,
+    monospace;
+}
+.import-form textarea {
+  display: block;
+  margin: 5px 0 8px;
+  width: 100%;
+  resize: vertical;
+  padding: 9px 11px;
+  border: 1px solid #877a97;
+  border-radius: 8px;
+  color: var(--ink);
+  background: #fcfbff;
+  font:
+    13px/1.45 ui-monospace,
+    monospace;
+}
+.import-form textarea::placeholder {
+  color: #655c73;
+}
+@media (max-width: 500px) {
+  .preview-row {
+    display: block;
+  }
+  #play {
+    margin: 10px 0 0;
+  }
+}

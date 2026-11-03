@@ -3,11 +3,13 @@
   const axes = ["x1", "y1", "x2", "y2"];
   const values = [...CurveCourier.presets.express];
   const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  let animation;
+  let animations = [];
+  let reference;
 
   function reset() {
-    animation?.cancel();
-    animation = undefined;
+    for (const animation of animations) animation.cancel();
+    animations = [];
+    el("reference-runner").style.removeProperty("transform");
     el("runner").style.removeProperty("transform");
     el("motion-status").textContent = "";
   }
@@ -20,8 +22,11 @@
     el("css").textContent =
       "transition-timing-function: " + CurveCourier.easing(values) + ";";
     axes.forEach((name, index) => {
-      el(name).value = values[index];
-      el("value-" + name).value = values[index].toFixed(2);
+      const exact = values[index];
+      const hundredth = Number(exact.toFixed(2)) === exact;
+      el(name).step = hundredth ? "0.01" : "any";
+      el(name).value = exact;
+      el("value-" + name).value = hundredth ? exact.toFixed(2) : String(exact);
     });
     for (const [number, offset] of [
       [1, 0],
@@ -62,26 +67,73 @@
     update();
   });
 
+  function updateReference() {
+    reset();
+    el("reference-curve").toggleAttribute("hidden", !reference);
+    el("reference-lane").hidden = !reference;
+    el("clear-reference").hidden = !reference;
+    if (reference) {
+      el("reference-curve").setAttribute("d", CurveCourier.path(reference));
+      el("pin-status").textContent =
+        "Dashed reference: " + CurveCourier.easing(reference);
+    } else {
+      el("reference-curve").removeAttribute("d");
+      el("pin-status").textContent = "Reference cleared.";
+    }
+  }
+
+  el("pin-reference").addEventListener("click", () => {
+    reference = [...values];
+    updateReference();
+  });
+  el("clear-reference").addEventListener("click", () => {
+    reference = undefined;
+    updateReference();
+    el("pin-reference").focus();
+  });
+  el("import-form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    try {
+      const imported = CurveCourier.parseCSS(el("css-import").value);
+      values.splice(0, 4, ...imported);
+      update();
+      el("css-import").removeAttribute("aria-invalid");
+      el("css-import-status").textContent = "Curve applied.";
+    } catch (error) {
+      el("css-import").setAttribute("aria-invalid", "true");
+      el("css-import-status").textContent = error.message;
+    }
+  });
+  el("css-import").addEventListener("input", () => {
+    el("css-import").removeAttribute("aria-invalid");
+    el("css-import-status").textContent = "";
+  });
+
   el("play").addEventListener("click", () => {
     reset();
-    const runner = el("runner");
-    const distance = runner.parentElement.clientWidth - runner.offsetWidth;
-    const end = "translateX(" + distance + "px)";
-    runner.style.transform = end;
+    const lanes = [[el("runner"), values]];
+    if (reference) lanes.push([el("reference-runner"), reference]);
+    const start = document.timeline.currentTime;
+    for (const [runner, curve] of lanes) {
+      const distance = runner.parentElement.clientWidth - runner.offsetWidth;
+      const end = "translateX(" + distance + "px)";
+      runner.style.transform = end;
+      if (!motion.matches) {
+        const animation = runner.animate(
+          [{ transform: "translateX(0)" }, { transform: end }],
+          { duration: 900, easing: CurveCourier.easing(curve) },
+        );
+        if (start !== null) animation.startTime = start;
+        animations.push(animation);
+      }
+    }
     if (motion.matches) {
       el("motion-status").textContent =
         "End position shown with reduced motion.";
       return;
     }
-    animation = runner.animate(
-      [{ transform: "translateX(0)" }, { transform: end }],
-      {
-        duration: 900,
-        easing: CurveCourier.easing(values),
-      },
-    );
     el("motion-status").textContent = "Playing.";
-    animation.onfinish = () => {
+    animations[0].onfinish = () => {
       el("motion-status").textContent = "Motion complete.";
     };
   });

@@ -8,6 +8,7 @@
     <link rel="icon" href="data:," />
     <link rel="stylesheet" href="fonts/type.css" />
     <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="comparison.css" />
     <script defer src="model.js"></script>
     <script defer src="app.js"></script>
   </head>
@@ -71,6 +72,14 @@
             stroke-width="2.6"
             stroke-linecap="round"
           />
+          <path
+            id="reference-curve"
+            fill="none"
+            stroke="#14645c"
+            stroke-width="2"
+            stroke-dasharray="4 4"
+            hidden
+          />
           <g fill="#884695" stroke="#f4f5fb" stroke-width="1.5">
             <circle id="dot1" r="4" />
             <circle id="dot2" r="4" />
@@ -93,6 +102,13 @@
           <option value="custom" disabled>Custom</option>
         </select>
         <div class="sliders" id="sliders"></div>
+        <div class="pin-actions">
+          <button id="pin-reference" type="button">Pin current curve</button>
+          <button id="clear-reference" type="button" hidden>
+            Clear reference
+          </button>
+        </div>
+        <p id="pin-status" role="status"></p>
       </section>
       <section class="preview" aria-labelledby="preview-title">
         <div class="cap">
@@ -100,7 +116,20 @@
           <span>900 ms</span>
         </div>
         <div class="preview-row">
-          <div class="track"><span id="runner" aria-hidden="true"></span></div>
+          <div class="lanes">
+            <div class="lane">
+              <span class="lane-name">Current</span>
+              <div class="track">
+                <span id="runner" aria-hidden="true"></span>
+              </div>
+            </div>
+            <div class="lane" id="reference-lane" hidden>
+              <span class="lane-name">Pinned</span>
+              <div class="track">
+                <span id="reference-runner" aria-hidden="true"></span>
+              </div>
+            </div>
+          </div>
           <button id="play" type="button">Play motion</button>
         </div>
         <p id="motion-status" role="status"></p>
@@ -112,6 +141,18 @@
           ><button id="copy" type="button">Copy CSS</button>
         </div>
         <p id="copy-status" role="status"></p>
+        <form class="import-form" id="import-form">
+          <label for="css-import">Import easing CSS</label>
+          <textarea
+            id="css-import"
+            rows="2"
+            maxlength="512"
+            placeholder="cubic-bezier(0.25, 0.1, 0.25, 1)"
+            aria-describedby="css-import-status"
+          ></textarea>
+          <button type="submit" id="apply-css">Apply curve</button>
+          <p id="css-import-status" role="status"></p>
+        </form>
       </section>
     </main>
   </body>
