@@ -55,3 +55,25 @@ test("CSS import rejects invalid, compound and out-of-canvas inputs", () => {
     assert.throws(() => parseCSS(value));
   }
 });
+
+test("dragging maps graph coordinates back to precise clamped control values", () => {
+  const { unplot } = require("../public/model.js");
+  for (const pair of [
+    [0, 0],
+    [1, 1],
+    [0.123, 1.333],
+    [0.905, -0.235],
+  ]) {
+    assert.deepEqual(unplot(...plot(...pair)), pair);
+  }
+  assert.deepEqual(unplot(-100, -1000), [0, 1.5]);
+  assert.deepEqual(unplot(700, 800), [1, -0.5]);
+  assert.deepEqual(unplot(...plot(0.12381, -0.30267)), [0.124, -0.303]);
+});
+test("arrow-key nudges respect the same canvas bounds and precision", () => {
+  const { nudge } = require("../public/model.js");
+  assert.deepEqual(nudge(0.85, 1.49, "ArrowUp", 0.1), [0.85, 1.5]);
+  assert.deepEqual(nudge(0, 0, "ArrowLeft", 0.01), [0, 0]);
+  assert.deepEqual(nudge(0.123, 0.4, "ArrowRight", 0.001), [0.124, 0.4]);
+  assert.deepEqual(nudge(1, -0.495, "ArrowDown", 0.01), [1, -0.5]);
+});

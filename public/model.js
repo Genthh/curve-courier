@@ -68,6 +68,26 @@ const CurveCourier = (() => {
     return [28 + 240 * x, 140 - 76 * y];
   }
 
+  function coordinatePair(x, y) {
+    const quantize = (value, low, high) =>
+      Number(Math.min(high, Math.max(low, value)).toFixed(3));
+    return [quantize(x, 0, 1), quantize(y, -0.5, 1.5)];
+  }
+
+  function unplot(x, y) {
+    return coordinatePair((x - 28) / 240, (140 - y) / 76);
+  }
+
+  function nudge(x, y, key, amount) {
+    const shifts = {
+      ArrowUp: [0, amount],
+      ArrowDown: [0, -amount],
+      ArrowLeft: [-amount, 0],
+      ArrowRight: [amount, 0],
+    };
+    return coordinatePair(x + shifts[key][0], y + shifts[key][1]);
+  }
+
   function path(values) {
     if (!valid(values)) throw new RangeError("Invalid curve");
     const pair = (x, y) =>
@@ -94,7 +114,7 @@ const CurveCourier = (() => {
     );
   }
 
-  return { presets, valid, easing, parseCSS, plot, path, match };
+  return { presets, valid, easing, parseCSS, plot, unplot, nudge, path, match };
 })();
 
 if (typeof module !== "undefined") module.exports = CurveCourier;
