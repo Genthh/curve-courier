@@ -83,3 +83,36 @@
     margin: 10px 0 0;
   }
 }
+
+#graph-hint {
+  color: var(--quiet);
+  font:
+    13px/1.4 Arial,
+    sans-serif;
+  padding: 5px 12px 4px;
+}
+.handles circle {
+  fill: transparent;
+  stroke: transparent;
+  stroke-width: 18px;
+  vector-effect: non-scaling-stroke;
+  pointer-events: all;
+  cursor: grab;
+  touch-action: none;
+}
+.handles circle:focus-visible {
+  stroke: #532c7d;
+  stroke-width: 2px;
+  outline: none;
+}
+.handles circle:active {
+  cursor: grabbing;
+}
+.handle-tags {
+  fill: #4d2f6a;
+  font:
+    6px ui-monospace,
+    monospace;
+  text-anchor: middle;
+  pointer-events: none;
+}

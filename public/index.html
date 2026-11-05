@@ -30,8 +30,9 @@
         <svg
           id="chart"
           viewBox="0 0 294 204"
-          role="img"
-          aria-label="Timing curve from zero to one"
+          role="group"
+          aria-label="Interactive timing curve"
+          aria-describedby="graph-hint"
         >
           <defs>
             <pattern
@@ -88,7 +89,35 @@
             <circle cx="28" cy="140" r="2.7" />
             <circle cx="268" cy="64" r="2.7" />
           </g>
+          <g class="handle-tags" aria-hidden="true">
+            <text id="tag1">1</text>
+            <text id="tag2">2</text>
+          </g>
+          <g class="handles">
+            <circle
+              id="handle1"
+              data-handle="1"
+              r="5.5"
+              tabindex="0"
+              role="button"
+              aria-label="Control point 1"
+              aria-describedby="graph-hint"
+            />
+            <circle
+              id="handle2"
+              data-handle="2"
+              r="5.5"
+              tabindex="0"
+              role="button"
+              aria-label="Control point 2"
+              aria-describedby="graph-hint"
+            />
+          </g>
         </svg>
+        <p id="graph-hint">
+          Drag either point, or use the arrow keys. Hold Shift for larger steps
+          and Alt for fine adjustments.
+        </p>
       </section>
       <section class="controls" aria-labelledby="control-title">
         <h2 id="control-title">Control points</h2>

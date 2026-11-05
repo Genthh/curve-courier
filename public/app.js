@@ -5,6 +5,8 @@
   const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
   let animations = [];
   let reference;
+  let drag;
+  let lastHandle = 2;
 
   function reset() {
     for (const animation of animations) animation.cancel();
@@ -37,6 +39,20 @@
       el("arm" + number).setAttribute("y2", y);
       el("dot" + number).setAttribute("cx", x);
       el("dot" + number).setAttribute("cy", y);
+      const handle = el("handle" + number);
+      handle.setAttribute("cx", x);
+      handle.setAttribute("cy", y);
+      handle.setAttribute(
+        "aria-label",
+        "Control point " +
+          number +
+          ", X " +
+          values[offset] +
+          ", Y " +
+          values[offset + 1],
+      );
+      el("tag" + number).setAttribute("x", x + (number === 1 ? -7 : 7));
+      el("tag" + number).setAttribute("y", y - 7);
     }
   }
 
@@ -60,6 +76,71 @@
     });
     wrap.append(label, value, slider);
     el("sliders").append(wrap);
+  });
+
+  const chart = el("chart");
+  function chartPoint(event) {
+    return new DOMPoint(event.clientX, event.clientY).matrixTransform(
+      chart.getScreenCTM().inverse(),
+    );
+  }
+
+  chart.addEventListener("pointerdown", (event) => {
+    const hit = event.target.closest("[data-handle]");
+    if (!hit || drag || !event.isPrimary || event.button !== 0) return;
+    const point = chartPoint(event);
+    let number = Number(hit.dataset.handle);
+    if (values[0] === values[2] && values[1] === values[3])
+      number = lastHandle === 2 ? 1 : 2;
+    lastHandle = number;
+    const offset = (number - 1) * 2;
+    const [x, y] = CurveCourier.plot(values[offset], values[offset + 1]);
+    drag = { id: event.pointerId, offset, dx: x - point.x, dy: y - point.y };
+    chart.setPointerCapture(event.pointerId);
+    el("handle" + number).focus({ preventScroll: true });
+    event.preventDefault();
+  });
+  chart.addEventListener("pointermove", (event) => {
+    if (!drag || event.pointerId !== drag.id) return;
+    const point = chartPoint(event);
+    values.splice(
+      drag.offset,
+      2,
+      ...CurveCourier.unplot(point.x + drag.dx, point.y + drag.dy),
+    );
+    update();
+  });
+  for (const type of ["pointerup", "pointercancel", "lostpointercapture"]) {
+    chart.addEventListener(type, (event) => {
+      if (drag?.id === event.pointerId) drag = undefined;
+    });
+  }
+  chart.addEventListener("keydown", (event) => {
+    const handle = event.target.closest("[data-handle]");
+    if (!handle) return;
+    const offset = (Number(handle.dataset.handle) - 1) * 2;
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      el(axes[offset]).focus();
+      return;
+    }
+    if (
+      !["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)
+    )
+      return;
+    event.preventDefault();
+    const amount = event.altKey ? 0.001 : event.shiftKey ? 0.1 : 0.01;
+    values.splice(
+      offset,
+      2,
+      ...CurveCourier.nudge(
+        values[offset],
+        values[offset + 1],
+        event.key,
+        amount,
+      ),
+    );
+    update();
   });
 
   el("preset").addEventListener("change", (event) => {
